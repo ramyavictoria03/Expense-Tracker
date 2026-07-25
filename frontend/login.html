@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ledger - Login</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        body{
+            margin:0;
+            font-family:Inter,sans-serif;
+            background:#0f172a;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .login-card{
+            width:400px;
+            background:white;
+            border-radius:18px;
+            padding:40px;
+            box-shadow:0 15px 40px rgba(0,0,0,.2);
+        }
+
+        h1{
+            margin-bottom:8px;
+        }
+
+        p{
+            color:#666;
+            margin-bottom:30px;
+        }
+
+        .input-group{
+            margin-bottom:20px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:8px;
+            font-weight:600;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            border-radius:10px;
+            border:1px solid #ccc;
+            font-size:15px;
+            box-sizing:border-box;
+        }
+
+        button{
+            width:100%;
+            padding:14px;
+            background:#4f46e5;
+            color:white;
+            border:none;
+            border-radius:10px;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#4338ca;
+        }
+
+        .signup-link{
+            margin-top:20px;
+            text-align:center;
+        }
+
+        .signup-link a{
+            text-decoration:none;
+            color:#4f46e5;
+            font-weight:600;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="login-card">
+
+    <h1>Welcome Back 👋</h1>
+
+    <p>Login to your Ledger account</p>
+
+    <form id="loginForm">
+
+        <div class="input-group">
+
+            <label>Email</label>
+
+            <input
+                type="email"
+                id="email"
+                required
+            >
+
+        </div>
+
+        <div class="input-group">
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="password"
+                required
+            >
+
+        </div>
+
+        <button type="submit">
+
+            Login
+
+        </button>
+
+    </form>
+
+    <div class="signup-link">
+
+        Don't have an account?
+
+        <a href="signup.html">
+
+            Sign Up
+
+        </a>
+
+    </div>
+
+</div>
+
+<script src="login.js"></script>
+
+</body>
+</html>

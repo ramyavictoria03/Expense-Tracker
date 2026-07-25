@@ -1,0 +1,28 @@
+{
+  "name": "ledger-expense-tracker",
+  "version": "1.0.0",
+  "description": "Smart Expense Tracker — modern, responsive frontend built with HTML, CSS and vanilla JavaScript. Uses dummy data; ready to be wired up to a Java + Spring Boot + MySQL backend.",
+  "private": true,
+  "main": "index.html",
+  "scripts": {
+    "start": "npx --yes serve . -l 5173",
+    "dev": "npx --yes live-server --port=5173"
+  },
+  "keywords": [
+    "expense-tracker",
+    "finance",
+    "dashboard",
+    "vanilla-js",
+    "frontend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.0",
+    "serve": "^14.2.3"
+  },
+  "dependencies": {
+    "http-auth": "^4.2.1",
+    "lodash": "^4.18.1"
+  }
+}

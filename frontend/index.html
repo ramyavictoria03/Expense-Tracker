@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Smart Expense Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== PRELOADER ===== -->
+<div id="preloader" class="preloader">
+  <div class="preloader-mark">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M24 4 C12.5 4 4 12.8 4 24 C4 35.2 12.5 44 24 44 C31 44 36.8 40.6 40 35.5" stroke="url(#pg)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M24 14v20M18 18h9a4 4 0 010 8h-9M18 22h9" stroke="url(#pg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs><linearGradient id="pg" x1="4" y1="4" x2="44" y2="44"><stop stop-color="#6D5BD0"/><stop offset="1" stop-color="#16C79A"/></linearGradient></defs>
+    </svg>
+  </div>
+  <p>Opening your ledger…</p>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <span class="brand-mark">
+      <svg viewBox="0 0 48 48" fill="none">
+        <path d="M24 4 C12.5 4 4 12.8 4 24 C4 35.2 12.5 44 24 44 C31 44 36.8 40.6 40 35.5" stroke="url(#bg1)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M24 14v20M18 18h9a4 4 0 010 8h-9M18 22h9" stroke="url(#bg1)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="bg1" x1="4" y1="4" x2="44" y2="44"><stop stop-color="#6D5BD0"/><stop offset="1" stop-color="#16C79A"/></linearGradient></defs>
+      </svg>
+    </span>
+    <span class="brand-name">Ledger</span>
+  </div>
+
+  <nav class="nav" id="sideNav">
+    <a href="#dashboard" class="nav-link active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+    <a href="#add" class="nav-link" data-page="add"><i class="fa-solid fa-circle-plus"></i><span>Add Transaction</span></a>
+    <a href="#transactions" class="nav-link" data-page="transactions"><i class="fa-solid fa-receipt"></i><span>Transactions</span></a>
+    <a href="#analytics" class="nav-link" data-page="analytics"><i class="fa-solid fa-chart-line"></i><span>Analytics</span></a>
+    <a href="#insights" class="nav-link" data-page="insights"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI Insights</span></a>
+    <a href="#settings" class="nav-link" data-page="settings"><i class="fa-solid fa-sliders"></i><span>Settings</span></a>
+  </nav>
+
+  <div class="sidebar-budget">
+    <div class="sidebar-budget-head">
+      <span>Monthly budget</span>
+      <span id="sbBudgetPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="sbBudgetFill"></div></div>
+    <div class="sidebar-budget-foot"><span id="sbSpent">₹0</span><span id="sbTotal">of ₹0</span></div>
+  </div>
+
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <i class="fa-solid fa-sun"></i>
+    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+    <i class="fa-solid fa-moon"></i>
+  </button>
+</aside>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+  <header class="topbar">
+    <button class="icon-btn hide-desktop" id="menuBtn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title">
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="pageSubtitle">Welcome back — here's where things stand.</p>
+    </div>
+    <div class="topbar-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="globalSearch" placeholder="Search transactions… (Ctrl K)">
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn tooltip" data-tooltip="Notifications" id="notifBtn"><i class="fa-solid fa-bell"></i><span class="dot"></span></button>
+      <div class="topbar-actions">
+
+    <button class="icon-btn tooltip" data-tooltip="Notifications" id="notifBtn">
+        <i class="fa-solid fa-bell"></i>
+    </button>
+
+    <button class="icon-btn tooltip" data-tooltip="Add transaction (Ctrl + N)" id="quickAddBtn">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <div
+    class="avatar tooltip"
+    id="userInitials"
+    data-tooltip="Logout"
+    onclick="logout()"
+    style="cursor:pointer;"
+>
+    AK
+</div>
+
+</div>
+    </div>
+  </header>
+
+  <main class="content" id="content">
+
+    <!-- ================= DASHBOARD ================= -->
+    <section class="page active" id="page-dashboard">
+      <div class="greeting-row">
+        <div>
+          <p class="eyebrow" id="greetingText">Good morning, <span id="userName"></span></p>
+          <h2 class="greeting-date" id="greetingDate">Monday, 13 July 2026</h2>
+        </div>
+        <button class="btn btn-primary" id="dashQuickAdd"><i class="fa-solid fa-bolt"></i> Quick add expense</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card glass stat-balance skeleton-wrap">
+          <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+          <p class="stat-label">Total balance</p>
+          <p class="stat-value mono" data-counter="balance">₹0</p>
+          <p class="stat-sub up"><i class="fa-solid fa-arrow-trend-up"></i> 6.2% vs last month</p>
+        </div>
+        <div class="stat-card glass stat-income skeleton-wrap">
+          <div class="stat-icon"><i class="fa-solid fa-arrow-down-left"></i></div>
+          <p class="stat-label">Total income</p>
+          <p class="stat-value mono" data-counter="income">₹0</p>
+          <p class="stat-sub up"><i class="fa-solid fa-arrow-trend-up"></i> 3.1% vs last month</p>
+        </div>
+        <div class="stat-card glass stat-expense skeleton-wrap">
+          <div class="stat-icon"><i class="fa-solid fa-arrow-up-right"></i></div>
+          <p class="stat-label">Total expenses</p>
+          <p class="stat-value mono" data-counter="expense">₹0</p>
+          <p class="stat-sub down"><i class="fa-solid fa-arrow-trend-down"></i> 12.4% vs last month</p>
+        </div>
+        <div class="stat-card glass stat-savings skeleton-wrap">
+          <div class="stat-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+          <p class="stat-label">Savings</p>
+          <p class="stat-value mono" data-counter="savings">₹0</p>
+          <p class="stat-sub up"><i class="fa-solid fa-arrow-trend-up"></i> 18% saved rate</p>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="card glass budget-card">
+          <div class="card-head">
+            <h3>Monthly budget</h3>
+            <span class="pill" id="budgetPill">On track</span>
+          </div>
+          <div class="progress-track lg"><div class="progress-fill" id="dashBudgetFill"></div></div>
+          <div class="budget-foot">
+            <span><strong class="mono" id="dashSpent">₹0</strong> spent</span>
+            <span class="muted">of <strong class="mono" id="dashBudgetTotal">₹0</strong></span>
+          </div>
+        </div>
+
+        <div class="card glass chart-card">
+          <div class="card-head">
+            <h3>Monthly spending overview</h3>
+            <select class="mini-select" id="overviewRange"><option>6 months</option><option>12 months</option></select>
+          </div>
+          <canvas id="overviewChart" height="200"></canvas>
+        </div>
+
+        <div class="card glass chart-card">
+          <div class="card-head"><h3>Category-wise spending</h3></div>
+          <canvas id="categoryPie" height="220"></canvas>
+          <div class="legend-list" id="pieLegend"></div>
+        </div>
+
+        <div class="card glass recent-card">
+          <div class="card-head">
+            <h3>Recent transactions</h3>
+            <a href="#transactions" class="nav-link-inline" data-page="transactions">View all <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div id="recentList" class="tx-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ADD TRANSACTION ================= -->
+    <section class="page" id="page-add">
+      <div class="form-wrap">
+        <div class="card glass form-card">
+          <div class="type-toggle" id="typeToggle">
+            <button type="button" class="type-opt active" data-type="expense"><i class="fa-solid fa-arrow-up"></i> Expense</button>
+            <button type="button" class="type-opt" data-type="income"><i class="fa-solid fa-arrow-down"></i> Income</button>
+          </div>
+
+          <form id="txForm" novalidate>
+            <div class="field">
+              <label for="txAmount">Amount</label>
+              <div class="amount-input">
+                <span id="currencyPrefix">₹</span>
+                <input type="number" id="txAmount" placeholder="0.00" step="0.01" min="0.01" required>
+              </div>
+              <p class="error-msg" id="err-amount">Enter an amount greater than 0.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="txTitle">Title</label>
+                <input type="text" id="txTitle" placeholder="e.g. Swiggy dinner" required>
+                <p class="error-msg" id="err-title">Give this transaction a title.</p>
+              </div>
+              <div class="field">
+                <label for="txDate">Date</label>
+                <input type="date" id="txDate" required>
+                <p class="error-msg" id="err-date">Pick a date.</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Category</label>
+              <div class="category-grid" id="categoryGrid"></div>
+              <p class="error-msg" id="err-category">Choose a category.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="txPayment">Payment method</label>
+                <select id="txPayment">
+                  <option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="txDesc">Description</label>
+                <input type="text" id="txDesc" placeholder="Optional short description">
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="txNotes">Notes</label>
+              <textarea id="txNotes" rows="2" placeholder="Anything else worth remembering…"></textarea>
+            </div>
+
+            <div class="field">
+              <label>Attach receipt</label>
+              <label class="dropzone" id="dropzone">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span id="dropzoneText">Drop an image here or click to browse (UI only)</span>
+                <input type="file" id="receiptInput" accept="image/*" hidden>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="reset" class="btn btn-ghost" id="txReset">Clear form</button>
+              <button type="submit" class="btn btn-primary btn-lg"><i class="fa-solid fa-check"></i> Save transaction</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card glass form-preview">
+          <p class="eyebrow">Live preview</p>
+          <div class="preview-tx" id="previewTx">
+            <div class="preview-icon" id="previewIcon"><i class="fa-solid fa-utensils"></i></div>
+            <div class="preview-info">
+              <p class="preview-title" id="previewTitle">Transaction title</p>
+              <p class="preview-meta" id="previewMeta">Category · Payment method</p>
+            </div>
+            <p class="preview-amount mono" id="previewAmount">₹0.00</p>
+          </div>
+          <p class="hint"><i class="fa-solid fa-lightbulb"></i> Tip: press <kbd>Ctrl</kbd>+<kbd>N</kbd> anywhere to jump here instantly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TRANSACTIONS ================= -->
+    <section class="page" id="page-transactions">
+      <div class="card glass filter-bar">
+        <div class="filter-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="txSearch" placeholder="Search by title, notes, category…">
+        </div>
+        <select id="filterType" class="mini-select"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option></select>
+        <select id="filterCategory" class="mini-select"><option value="all">All categories</option></select>
+        <select id="filterPayment" class="mini-select"><option value="all">All payment methods</option><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select>
+        <input type="date" id="filterFrom" class="mini-select" title="From date">
+        <input type="date" id="filterTo" class="mini-select" title="To date">
+        <select id="sortBy" class="mini-select">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="highest">Highest amount</option>
+          <option value="lowest">Lowest amount</option>
+        </select>
+        <button class="btn btn-ghost" id="clearFilters"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+      </div>
+
+      <div class="card glass table-card">
+        <div class="table-wrap">
+          <table class="tx-table" id="txTable">
+            <thead>
+              <tr><th>Transaction</th><th>Category</th><th>Payment</th><th>Date</th><th class="right">Amount</th><th></th></tr>
+            </thead>
+            <tbody id="txTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="txEmptyState" hidden>
+          <i class="fa-solid fa-box-open"></i>
+          <h3>Nothing here yet</h3>
+          <p>No transactions match your filters. Try widening your search.</p>
+          <button class="btn btn-primary" id="emptyStateReset">Reset filters</button>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+
+    <!-- ================= ANALYTICS ================= -->
+    <section class="page" id="page-analytics">
+      <div class="analytics-summary">
+        <div class="mini-stat glass"><span class="mini-stat-label">Highest category</span><span class="mini-stat-value" id="anHighestCat">—</span></div>
+        <div class="mini-stat glass"><span class="mini-stat-label">Largest expense</span><span class="mini-stat-value mono" id="anLargestExpense">—</span></div>
+        <div class="mini-stat glass"><span class="mini-stat-label">Total transactions</span><span class="mini-stat-value mono" id="anTotalTx">—</span></div>
+        <div class="mini-stat glass"><span class="mini-stat-label">Avg. daily spend</span><span class="mini-stat-value mono" id="anAvgDaily">—</span></div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="card glass chart-card span-2">
+          <div class="card-head"><h3>Monthly expenses</h3></div>
+          <canvas id="monthlyExpenseChart" height="190"></canvas>
+        </div>
+        <div class="card glass chart-card">
+          <div class="card-head"><h3>Income vs expense</h3></div>
+          <canvas id="incomeExpenseChart" height="220"></canvas>
+        </div>
+        <div class="card glass chart-card">
+          <div class="card-head"><h3>Spending by category</h3></div>
+          <canvas id="analyticsCategoryChart" height="220"></canvas>
+        </div>
+        <div class="card glass chart-card span-2">
+          <div class="card-head"><h3>Weekly spending trend</h3></div>
+          <canvas id="weeklyTrendChart" height="170"></canvas>
+        </div>
+        <div class="card glass budget-card">
+          <div class="card-head"><h3>Budget utilization</h3></div>
+          <div class="progress-track lg"><div class="progress-fill" id="anBudgetFill"></div></div>
+          <div class="budget-foot"><span class="mono" id="anBudgetPct">0%</span><span class="muted">used this month</span></div>
+        </div>
+        <div class="card glass compare-card">
+          <div class="card-head"><h3>Monthly comparison</h3></div>
+          <div class="compare-grid" id="compareGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= AI INSIGHTS ================= -->
+    <section class="page" id="page-insights">
+      <div class="insights-grid" id="insightsGrid"></div>
+
+      <div class="card glass chat-card">
+        <div class="chat-head">
+          <div class="chat-head-icon"><i class="fa-solid fa-sparkles"></i></div>
+          <div>
+            <h3>Ask your AI assistant</h3>
+            <p class="muted">Sample conversation — live analysis arrives with the backend.</p>
+          </div>
+        </div>
+        <div class="chat-body" id="chatBody"></div>
+        <form class="chat-input-row" id="chatForm">
+          <input type="text" id="chatInput" placeholder="Ask about your spending…" autocomplete="off">
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section class="page" id="page-settings">
+      <div class="settings-grid">
+        <div class="card glass settings-card">
+          <h3>Profile</h3>
+          <div class="profile-row">
+            <div class="avatar lg" id="profileAvatar">AK</div>
+            <div>
+              <p class="profile-name"><span id="profileUserName"></span></p>
+              <p class="muted" id="profileEmail"></p>
+            </div>
+          </div>
+          <div class="field"><label for="setName">Full name</label><input type="text" id="setName"></div>
+          <div class="field"><label for="setEmail">Email</label><input type="email" id="setEmail"></div>
+          <button class="btn btn-primary" id="saveProfile">Save profile</button>
+        </div>
+
+        <div class="card glass settings-card">
+          <h3>Preferences</h3>
+          <div class="field"><label for="setCurrency">Currency</label>
+            <select id="setCurrency"><option value="₹">₹ Indian Rupee</option><option value="$">$ US Dollar</option><option value="€">€ Euro</option><option value="£">£ British Pound</option></select>
+          </div>
+          <div class="field"><label for="setBudget">Monthly budget</label><input type="number" id="setBudget" value="45000"></div>
+          <div class="switch-row">
+            <div><p>Dark mode</p><p class="muted">Switch between light and dark themes</p></div>
+            <label class="switch"><input type="checkbox" id="setDarkMode"><span class="slider"></span></label>
+          </div>
+          <div class="switch-row">
+            <div><p>Notifications</p><p class="muted">Budget alerts and weekly summaries</p></div>
+            <label class="switch"><input type="checkbox" id="setNotif" checked><span class="slider"></span></label>
+          </div>
+          <button class="btn btn-primary" id="savePrefs">Save preferences</button>
+        </div>
+
+        <div class="card glass settings-card">
+          <h3>Data</h3>
+          <p class="muted">Export or back up your ledger. These actions are UI previews for now.</p>
+          <div class="settings-actions">
+            <button class="btn btn-secondary" id="exportBtn"><i class="fa-solid fa-file-export"></i> Export data (CSV)</button>
+            <button class="btn btn-secondary" id="backupBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Backup now</button>
+          </div>
+        </div>
+
+        <div class="card glass settings-card danger">
+          <h3>Session</h3>
+          <p class="muted" id="signedInText"></p>
+          <button class="btn btn-danger" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== FAB ===== -->
+<button class="fab" id="fab" aria-label="Add transaction"><i class="fa-solid fa-plus"></i></button>
+
+<!-- ===== MOBILE BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <a href="#dashboard" class="bn-link active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i><span>Home</span></a>
+  <a href="#transactions" class="bn-link" data-page="transactions"><i class="fa-solid fa-receipt"></i><span>History</span></a>
+  <a href="#add" class="bn-link bn-center" data-page="add"><i class="fa-solid fa-plus"></i></a>
+  <a href="#analytics" class="bn-link" data-page="analytics"><i class="fa-solid fa-chart-line"></i><span>Stats</span></a>
+  <a href="#settings" class="bn-link" data-page="settings"><i class="fa-solid fa-sliders"></i><span>Settings</span></a>
+</nav>
+
+<!-- ===== EDIT TRANSACTION MODAL ===== -->
+<div class="modal-backdrop" id="editModalBackdrop">
+  <div class="modal glass" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3>Edit transaction</h3><button class="icon-btn" id="editModalClose"><i class="fa-solid fa-xmark"></i></button></div>
+    <form id="editForm">
+      <div class="type-toggle" id="editTypeToggle">
+        <button type="button" class="type-opt active" data-type="expense"><i class="fa-solid fa-arrow-up"></i> Expense</button>
+        <button type="button" class="type-opt" data-type="income"><i class="fa-solid fa-arrow-down"></i> Income</button>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Amount</label><div class="amount-input"><span>₹</span><input type="number" id="editAmount" step="0.01" min="0.01" required></div></div>
+        <div class="field"><label>Date</label><input type="date" id="editDate" required></div>
+      </div>
+      <div class="field"><label>Title</label><input type="text" id="editTitle" required></div>
+      <div class="field">
+        <label>Category</label>
+        <select id="editCategory"></select>
+      </div>
+      <div class="field"><label>Payment method</label>
+        <select id="editPayment"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="editCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== DELETE CONFIRM MODAL ===== -->
+<div class="modal-backdrop" id="deleteModalBackdrop">
+  <div class="modal glass sm" role="dialog" aria-modal="true">
+    <div class="modal-icon danger"><i class="fa-solid fa-trash"></i></div>
+    <h3>Delete this transaction?</h3>
+    <p class="muted" id="deleteModalText">This action can't be undone.</p>
+    <div class="form-actions center">
+      <button class="btn btn-ghost" id="deleteCancel">Cancel</button>
+      <button class="btn btn-danger" id="deleteConfirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== QUICK ADD MODAL ===== -->
+<div class="modal-backdrop" id="quickModalBackdrop">
+  <div class="modal glass sm" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3>Quick add expense</h3><button class="icon-btn" id="quickModalClose"><i class="fa-solid fa-xmark"></i></button></div>
+    <form id="quickForm">
+      <div class="field"><label>Amount</label><div class="amount-input"><span>₹</span><input type="number" id="quickAmount" step="0.01" min="0.01" required autofocus></div></div>
+      <div class="field"><label>Title</label><input type="text" id="quickTitle" placeholder="e.g. Auto fare" required></div>
+      <div class="field"><label>Category</label><div class="category-grid" id="quickCategoryGrid"></div></div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="quickCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add expense</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
